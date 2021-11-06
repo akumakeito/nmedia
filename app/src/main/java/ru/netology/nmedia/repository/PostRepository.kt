@@ -19,6 +19,7 @@ interface PostRepository {
     suspend fun upload(uploadedMedia : MediaUpload) : Media
     fun getNewerCount(id: Long) :Flow<Int>
     suspend fun readPosts()
-    suspend fun sign() : AuthState
+    suspend fun signIn() : AuthState
+ //   suspend fun singOut(): AuthState
 
 }

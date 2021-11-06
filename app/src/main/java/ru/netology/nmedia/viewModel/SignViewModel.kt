@@ -14,9 +14,8 @@ class SignViewModel(application: Application) : AndroidViewModel(application) {
         PostRepositoryImpl(AppDB.getInstance(context = application).postDao())
 
     fun signIn() = viewModelScope.launch {
-        val response = repository.sign()
+        val response = repository.signIn()
         response.token?.let { AppAuth.getInstance().setAuth(response.id, response.token) }
-
     }
 
 }

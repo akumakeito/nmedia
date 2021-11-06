@@ -15,6 +15,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.EditPostFragment.Companion.edit
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.viewModel.AuthViewModel
 
 class AppActivity : AppCompatActivity(R.layout.activity_app) {
@@ -83,7 +84,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
             }
 
             R.id.singOut -> {
-                //TODO
+                AppAuth.getInstance().removeAuth()
                 true
             }
 
