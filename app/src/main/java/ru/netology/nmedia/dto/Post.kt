@@ -9,7 +9,8 @@ data class Post(
     val likedByMe: Boolean = false,
     val likes: Int = 0,
     var isRead: Boolean,
-    val attachment : Attachment? = null
+    val attachment : Attachment? = null,
+    val ownedByMe : Boolean = false
 )
 
 data class Attachment(

@@ -2,7 +2,10 @@ package ru.netology.nmedia.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
@@ -12,8 +15,11 @@ import com.google.firebase.messaging.FirebaseMessaging
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.EditPostFragment.Companion.edit
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
+import ru.netology.nmedia.viewModel.AuthViewModel
 
 class AppActivity : AppCompatActivity(R.layout.activity_app) {
+    private val viewModel : AuthViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -46,7 +52,43 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
         lifecycleScope
 
+        viewModel.data.observe(this) {
+            invalidateOptionsMenu()
+        }
+
         checkGoogleApiAvailability()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+
+        menu?.let {
+            it.setGroupVisible(R.id.unauthenticated, !viewModel.authenticated)
+            it.setGroupVisible(R.id.authenticated, viewModel.authenticated)
+        }
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.singIn -> {//TODO
+                findNavController(R.id.nav_host_fragment_container).navigate(
+                    R.id.action_feedFragment_to_signIn)
+                true
+            }
+
+            R.id.singUp -> {
+                //TODO
+                true
+            }
+
+            R.id.singOut -> {
+                //TODO
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun checkGoogleApiAvailability() {
