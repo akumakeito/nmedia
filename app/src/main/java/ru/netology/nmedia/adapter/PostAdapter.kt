@@ -1,8 +1,11 @@
 package ru.netology.nmedia.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.core.net.toUri
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -17,6 +20,7 @@ interface OnInteractionListener {
     fun onEdit(post: Post) {}
     fun onShare(post: Post) {}
     fun onRemove(post: Post) {}
+    fun onShowPhoto(post : Post) {}
 }
 
 class PostAdapter(
@@ -46,6 +50,14 @@ class PostViewHolder(
             like.text = WallService.displayCount(post.likes)
             like.isChecked = post.likedByMe
 
+            val urlImage = "http://10.0.2.2:9999/media/${post.attachment?.url}"
+            if (post.attachment != null) {
+                GlideApp.with(binding.image)
+                    .load(urlImage)
+                    .into(binding.image)
+            }
+
+
             val urlAvatar = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
 
             GlideApp.with(binding.avatar)
@@ -63,6 +75,10 @@ class PostViewHolder(
 
             share.setOnClickListener {
                 onInteractionListener.onShare(post)
+            }
+
+            image.setOnClickListener {
+                onInteractionListener.onShowPhoto(post)
             }
 
 

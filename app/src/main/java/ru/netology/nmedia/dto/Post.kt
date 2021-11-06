@@ -9,4 +9,10 @@ data class Post(
     val likedByMe: Boolean = false,
     val likes: Int = 0,
     var isRead: Boolean,
+    val attachment : Attachment? = null
+)
+
+data class Attachment(
+    val url: String,
+    val type: AttachmentType,
 )

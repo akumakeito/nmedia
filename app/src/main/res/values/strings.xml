@@ -25,4 +25,7 @@
     <string name="connection_lost" translatable="false">connection is lost. please try again later</string>
     <string name="google_play_unavailable" translatable="false">Google Api Unavailable</string>
     <string name="have_new_posts" translatable="false">%1$s new posts</string>
+    <string name="remove" translatable="false">Remove</string>
+    <string name="menu_save" translatable="false">Save</string>
+    <string name="menu_cancel" translatable="false">Cancel</string>
 </resources>

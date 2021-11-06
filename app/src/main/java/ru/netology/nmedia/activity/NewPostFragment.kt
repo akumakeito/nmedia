@@ -1,13 +1,19 @@
 package ru.netology.nmedia.activity
 
+import android.app.Activity
+import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Toast
+import android.view.*
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.github.dhaval2404.imagepicker.ImagePicker
+import com.github.dhaval2404.imagepicker.constant.ImageProvider
+
+
+import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.NewPostFragmentBinding
 import ru.netology.nmedia.utils.AndroidUtils
@@ -25,6 +31,36 @@ class NewPostFragment : Fragment() {
         ownerProducer = ::requireParentFragment
     )
 
+    private var fragmentBinding : NewPostFragmentBinding? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_new_post, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.save -> {
+                fragmentBinding?.let {
+                    viewModel.changeContent(it.editText.text.toString())
+                    viewModel.save()
+                    AndroidUtils.hideKeyboard(requireView())
+                }
+                true
+            }
+            R.id.cancel -> {
+                AndroidUtils.hideKeyboard(requireView())
+                findNavController().navigateUp()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -36,33 +72,74 @@ class NewPostFragment : Fragment() {
             false
         )
 
-        arguments?.textArg?.let(binding.editText::setText)
+        fragmentBinding = binding
 
-        binding.ok.setOnClickListener{
-            if (binding.editText.text.isNullOrBlank()) {
-                Toast.makeText(
-                    activity,
-                    this.getString(R.string.error_empty_content),
-                    Toast.LENGTH_SHORT)
-                    .show()
-            } else {
-                viewModel.changeContent(binding.editText.text.toString())
-                viewModel.save()
-                AndroidUtils.hideKeyboard(requireView())
+        arguments?.textArg
+            ?.let(binding.editText::setText)
 
+        val pickPhotoLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                when (it.resultCode) {
+                    ImagePicker.RESULT_ERROR -> {
+                        Snackbar.make(
+                            binding.root,
+                            ImagePicker.getError(it.data),
+                            Snackbar.LENGTH_LONG
+                        ).show()
+                    }
+                    Activity.RESULT_OK -> {
+                        val uri: Uri? = it.data?.data
+                        viewModel.changePhoto(uri, uri?.toFile())
+                    }
                 }
             }
+
+        binding.pickPhoto.setOnClickListener {
+            ImagePicker.with(this)
+                .crop()
+                .compress(2048)
+                .provider(ImageProvider.GALLERY)
+                .galleryMimeTypes(
+                    arrayOf(
+                        "image/png",
+                        "image/jpeg"
+                    )
+                )
+                .createIntent(pickPhotoLauncher::launch)
+        }
+
+        binding.takePhoto.setOnClickListener {
+            ImagePicker.with(this)
+                .crop()
+                .compress(2048)
+                .provider(ImageProvider.CAMERA)
+                .createIntent(pickPhotoLauncher::launch)
+        }
+
+        binding.removePhoto.setOnClickListener {
+            viewModel.changePhoto(null, null)
+        }
 
         viewModel.postCreated.observe(viewLifecycleOwner) {
             viewModel.loadPosts()
             findNavController().navigateUp()
         }
 
-        binding.cancelButton.setOnClickListener{
-            AndroidUtils.hideKeyboard(requireView())
-            findNavController().navigateUp()
+        viewModel.photo.observe(viewLifecycleOwner) {
+            if (it.uri == null) {
+                binding.photoContainer.visibility = View.GONE
+                return@observe
+            }
+
+            binding.photoContainer.visibility = View.VISIBLE
+            binding.photo.setImageURI(it.uri)
         }
 
         return binding.root
+    }
+
+    override fun onDestroy() {
+        fragmentBinding = null
+        super.onDestroy()
     }
 }
