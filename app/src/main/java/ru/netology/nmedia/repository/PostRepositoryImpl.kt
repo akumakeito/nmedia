@@ -189,16 +189,4 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         return response.body() ?: throw ApiError(response.code(), response.message())
     }
 
-//    override suspend fun singOut() : AuthState {
-//
-//        val response = PostsApi.service.updateUser("", "")
-//
-//        if (!response.isSuccessful) {
-//            throw ApiError(response.code(), response.message())
-//        }
-//
-//        return response.body() ?: throw ApiError(response.code(), response.message())
-//    }
-
-
 }
