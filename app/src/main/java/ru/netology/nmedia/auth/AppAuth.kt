@@ -1,9 +1,18 @@
 package ru.netology.nmedia.auth
 
 import android.content.Context
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.ktx.messaging
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import okhttp3.Dispatcher
+import ru.netology.nmedia.api.Api
+import ru.netology.ru.netology.nmedia.dto.PushToken
 import java.lang.IllegalStateException
 
 class AppAuth private constructor(context: Context) {
@@ -27,6 +36,9 @@ class AppAuth private constructor(context: Context) {
             _authStateFlow = MutableStateFlow(AuthState(id, token))
         }
 
+        sendPushToken()
+
+
     }
 
     val authStateFlow : StateFlow<AuthState> = _authStateFlow.asStateFlow()
@@ -39,6 +51,9 @@ class AppAuth private constructor(context: Context) {
             putString(tokenKey, token)
             apply()
         }
+
+        sendPushToken()
+        println("id = $id, token = $token")
     }
 
     @Synchronized
@@ -48,7 +63,22 @@ class AppAuth private constructor(context: Context) {
             clear()
             commit()
         }
+
+        sendPushToken()
     }
+
+    fun sendPushToken(token : String? = null) {
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                val pushToken = PushToken(token ?: Firebase.messaging.token.await())
+                Api.service.save(pushToken)
+            } catch (e : Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+
 
     companion object {
         @Volatile
