@@ -28,4 +28,10 @@
     <string name="remove" translatable="false">Remove</string>
     <string name="menu_save" translatable="false">Save</string>
     <string name="menu_cancel" translatable="false">Cancel</string>
+    <string name="sign_in" translatable="false">Sign in</string>
+    <string name="sign_up" translatable="false">Sign up</string>
+    <string name="sign_out" translatable="false">Sign out</string>
+    <string name="user_name" translatable="false">Username</string>
+    <string name="password" translatable="false">Password</string>
+    <string name="empty_login" translatable="false">Please fill in fields</string>
 </resources>

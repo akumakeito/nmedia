@@ -81,8 +81,7 @@ class PostViewHolder(
                 onInteractionListener.onShowPhoto(post)
             }
 
-
-
+            menu.visibility = if (post.ownedByMe) View.VISIBLE else View.INVISIBLE
 
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {

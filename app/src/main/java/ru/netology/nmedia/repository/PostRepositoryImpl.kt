@@ -1,6 +1,7 @@
 package ru.netology.nmedia.repository
 
 
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -10,8 +11,9 @@ import ru.netology.nmedia.ApiError
 import ru.netology.nmedia.AppError
 import ru.netology.nmedia.NetworkError
 import ru.netology.nmedia.UnknownAppError
-import ru.netology.nmedia.adapter.PostAdapter
+//import ru.netology.nmedia.adapter.PostAdapter
 import ru.netology.nmedia.api.PostsApi
+import ru.netology.nmedia.auth.AuthState
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.*
 import ru.netology.nmedia.entity.PostEntity
@@ -173,8 +175,18 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     override suspend fun readPosts() {
         dao.readNewPost()
-
     }
 
+    override suspend fun signIn() : AuthState {
+        //TODO hardcode
+
+        val response = PostsApi.service.updateUser("student", "secret")
+
+        if (!response.isSuccessful) {
+            throw ApiError(response.code(), response.message())
+        }
+
+        return response.body() ?: throw ApiError(response.code(), response.message())
+    }
 
 }
