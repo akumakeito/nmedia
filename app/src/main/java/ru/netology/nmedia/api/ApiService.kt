@@ -29,6 +29,7 @@ private val okhttp = OkHttpClient.Builder()
             val newRequest = chain.request().newBuilder()
                 .addHeader("Authorization", token)
                 .build()
+            return@addInterceptor chain.proceed(newRequest)
         }
         chain.proceed(chain.request())
     }
