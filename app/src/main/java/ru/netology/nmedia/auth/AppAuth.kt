@@ -99,4 +99,8 @@ class AppAuth private constructor(context: Context) {
 
 }
 
-data class AuthState(val id : Long = 0L, val token : String? = null, val avatar : String? = null)
+data class AuthState(val id : Long = 0L, val token : String? = null, val avatar : String? = null) {
+    override fun toString(): String {
+        return "AuthState(id=$id)"
+    }
+}
