@@ -11,7 +11,8 @@ import ru.netology.nmedia.repository.PostRepositoryImpl
 
 class SignViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: PostRepository =
-        PostRepositoryImpl(AppDB.getInstance(context = application).postDao())
+        PostRepositoryImpl(AppDB.getInstance(context = application).postDao(),
+            AppDB.getInstance(context = application).postWorkDao())
 
     fun signIn() = viewModelScope.launch {
         val response = repository.signIn()
