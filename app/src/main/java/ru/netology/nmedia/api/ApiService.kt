@@ -14,7 +14,7 @@ import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.ru.netology.nmedia.dto.PushToken
 
-private val BASE_URL = BuildConfig.BASE_URL
+private const val BASE_URL = BuildConfig.BASE_URL
 
 private val logging = HttpLoggingInterceptor().apply {
     if(BuildConfig.DEBUG) {
