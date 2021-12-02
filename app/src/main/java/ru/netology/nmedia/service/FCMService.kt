@@ -12,6 +12,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
 import ru.netology.nmedia.R
+import ru.netology.nmedia.auth.AppAuth
 import kotlin.random.Random
 
 
@@ -20,6 +21,7 @@ class FCMService : FirebaseMessagingService() {
     private val content = "content"
     private val likeChannelId = "like"
     private val newPostChannelId = "newPost"
+    private val pushTokenChannelId = "pushToken"
     private val gson = Gson()
 
     override fun onCreate() {
@@ -37,18 +39,33 @@ class FCMService : FirebaseMessagingService() {
                 newPostChannelId -> handlerNewPost(gson.fromJson(message.data[content], NewPost::class.java))
             }
         }
+
+        try {
+            val body = gson.fromJson(message.data[content], Push::class.java)
+            when (body.recipientId) {
+                AppAuth.getInstance().authStateFlow.value.id.toString(), null -> handlePush(body)
+                else -> AppAuth.getInstance().sendPushToken()
+            }
+
+            println(message.data[content])
+
+        } catch (e : Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun onNewToken(token: String) {
-        Log.d(TAG, "Refreshed token: $token")
+        AppAuth.getInstance().sendPushToken(token)
     }
 
     private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val nameLike = getString(R.string.channel_like_name)
             val nameNewPost = getString(R.string.channel_newPost_name)
+            val namePush = getString(R.string.channel_pushToken_name)
             val descriptionTextLike = getString(R.string.channel_like_description)
             val descriptionTextNewPost = getString(R.string.channel_new_post_description)
+            val descriptionTextPush = getString(R.string.channel_push_description)
             val importance = NotificationManager.IMPORTANCE_DEFAULT
             val channelLike = NotificationChannel(likeChannelId, nameLike, importance).apply {
                 description = descriptionTextLike
@@ -56,9 +73,15 @@ class FCMService : FirebaseMessagingService() {
             val channelNewPost = NotificationChannel(newPostChannelId, nameNewPost, importance).apply {
                 description = descriptionTextNewPost
             }
+
+            val channelPushToken = NotificationChannel(pushTokenChannelId, namePush, importance).apply {
+                description = descriptionTextPush
+            }
+
             val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channelLike)
             manager.createNotificationChannel(channelNewPost)
+            manager.createNotificationChannel(channelPushToken)
         }
     }
 
@@ -100,6 +123,16 @@ class FCMService : FirebaseMessagingService() {
             .notify(Random.nextInt(100_000), notification)
     }
 
+    private fun handlePush(push: Push) {
+        val notification = NotificationCompat.Builder(this, pushTokenChannelId)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentText(push.content)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        NotificationManagerCompat.from(this)
+            .notify(Random.nextInt(100_000), notification)
+    }
 
 }
 
@@ -116,4 +149,9 @@ data class NewPost(
     val userName: String,
     val postId: Long,
     val postContent: String
+)
+
+data class Push(
+    val recipientId : String?,
+    val content : String
 )

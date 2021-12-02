@@ -60,7 +60,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
         checkGoogleApiAvailability()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
 
         menu?.let {
@@ -90,6 +90,8 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
             else -> super.onOptionsItemSelected(item)
         }
+
+
     }
 
     private fun checkGoogleApiAvailability() {

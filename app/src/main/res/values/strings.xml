@@ -15,7 +15,9 @@
     <string name="chooser_share_post">Share post</string>
     <string name="channel_like_name" translatable="false">Like notifications</string>
     <string name="channel_newPost_name" translatable="false">New post notifications</string>
+    <string name="channel_pushToken_name" translatable="false">Push Token</string>
     <string name="channel_like_description" translatable="false">Notifications like</string>
+    <string name="channel_push_description" translatable="false">Notifications push</string>
     <string name="channel_new_post_description" translatable="false">Notifications new post</string>
     <string name="notification_user_liked" translatable="false">User %1$s liked %2$s\'s post</string>
     <string name="notification_user_new_post" translatable="false">User %1$s create new post</string>
