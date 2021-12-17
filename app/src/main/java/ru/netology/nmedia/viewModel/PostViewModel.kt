@@ -28,6 +28,7 @@ import java.lang.Exception
 private val empty = Post(
     id = 0L,
     author = "",
+    authorId = 0L,
     authorAvatar = "",
     published = 0L,
     content = "",
@@ -108,11 +109,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             _postCreated.value = Unit
             viewModelScope.launch {
                 try {
-                    val id = when (_photo.value) {
-                        noPhoto -> repository.saveWork(it, null)
-                        else -> repository.saveWork(it, _photo.value?.uri?.let {
+                    val post = it.copy(authorId = AppAuth.getInstance().authStateFlow.value.id)
+                    val id = repository.saveWork(it, _photo.value?.uri?.let {
                             MediaUpload(it.toFile()) })
-                }
                     val data = workDataOf(SavePostWorker.postKey to id)
                     val constraints = Constraints.Builder()
                         .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -187,7 +186,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                     .setConstraints(constraints)
                     .build()
                 workManager.enqueue(request)
-                repository.removeByIdWork(id)
+
             } catch (e: Exception) {
                 _dataState.value = FeedModelState(error = true)
 

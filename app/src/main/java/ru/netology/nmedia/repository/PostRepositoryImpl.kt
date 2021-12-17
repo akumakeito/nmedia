@@ -207,19 +207,8 @@ class PostRepositoryImpl(
                 }
             }
 
-            val postId = postWorkDao.insert(entity)
+            return postWorkDao.insert(entity)
 
-            postWorkDao.removeById(postId)
-
-            val response = Api.service.save(post.copy(id = postId))
-            if (!response.isSuccessful) {
-                throw ApiError(response.code(), response.message())
-            }
-
-            val body = response.body() ?: throw ApiError(response.code(), response.message())
-            postDao.insert(PostEntity.fromDto(body))
-
-            return postId
         } catch (e: Exception) {
             throw UnknownAppError
         }
@@ -228,9 +217,14 @@ class PostRepositoryImpl(
     override suspend fun processWork(id: Long) {
         try {
             val entity = postWorkDao.getById(id)
+            val postEntity = entity.toDto()
             if (entity.uri != null) {
                 val upload = MediaUpload(Uri.parse(entity.uri).toFile())
+                saveWithAttachment(postEntity, upload)
             }
+            save(postEntity)
+
+            postWorkDao.removeById(id)
 
             println(entity.id)
         } catch (e: Exception) {
@@ -238,17 +232,4 @@ class PostRepositoryImpl(
         }
     }
 
-    override suspend fun removeByIdWork(id: Long) {
-        try {
-            postWorkDao.removeById(id)
-            val response = Api.service.removeById(id)
-            if (!response.isSuccessful) {
-                throw ApiError(response.code(), response.message())
-            }
-
-            postDao.removeById(id)
-        } catch (e: Exception) {
-            throw UnknownAppError
-        }
-    }
 }

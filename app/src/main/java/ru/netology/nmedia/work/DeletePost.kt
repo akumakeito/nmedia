@@ -13,7 +13,8 @@ class DeletePostWorker(
     params: WorkerParameters
 ) : CoroutineWorker(applicationContext, params) {
     companion object {
-        const val postKey = "post"
+        const val name = "ru.netology.work.DeletePostsWorker"
+        const val postKey = "postId"
     }
 
     override suspend fun doWork(): Result {
@@ -28,10 +29,10 @@ class DeletePostWorker(
             )
 
         return try {
-            repository.removeByIdWork(id)
+            repository.removeById(id)
             Result.success()
         } catch (e: Exception) {
-            Result.failure()
+            Result.retry()
         }
     }
 
