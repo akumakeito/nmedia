@@ -14,7 +14,7 @@ class SavePostWorker(
 ) : CoroutineWorker (applicationContext, params) {
     companion object{
         const val name = "ru.netology.work.SavePostsWorker"
-        const val postKey = "postId"
+        const val postKey = "post"
     }
 
     override suspend fun doWork(): Result {
@@ -33,7 +33,7 @@ class SavePostWorker(
             repository.processWork(id)
             Result.success()
         } catch (e : Exception) {
-            Result.retry()
+            Result.failure()
         }
 
     }

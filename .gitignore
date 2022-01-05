@@ -1,8 +1,8 @@
 HELP.md
 .gradle
 build/
-fcm.json
-app/src/main/java/ru/netology/nmedia/constants.kt
+#app/fcm.json
+#app/src/main/java/ru/netology/nmedia/constants.kt
 
 ### STS ###
 .apt_generated

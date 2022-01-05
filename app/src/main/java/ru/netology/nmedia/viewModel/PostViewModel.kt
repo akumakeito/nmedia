@@ -110,8 +110,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             viewModelScope.launch {
                 try {
                     val post = it.copy(authorId = AppAuth.getInstance().authStateFlow.value.id)
-                    val id = repository.saveWork(it, _photo.value?.uri?.let {
-                            MediaUpload(it.toFile()) })
+                    val id = repository.saveWork(
+                        post, _photo.value?.uri?.let { MediaUpload(it.toFile()) }
+                    )
                     val data = workDataOf(SavePostWorker.postKey to id)
                     val constraints = Constraints.Builder()
                         .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -123,7 +124,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                     workManager.enqueue(request)
 
                     _dataState.value = FeedModelState()
-                } catch (e : Exception) {
+                } catch (e: Exception) {
                     e.printStackTrace()
                     _dataState.value = FeedModelState(error = true)
                 }
@@ -131,7 +132,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
         edited.value = empty
         _photo.value = noPhoto
-
     }
 
     fun readPosts() {

@@ -11,7 +11,7 @@ import ru.netology.nmedia.dto.Post
 data class PostWorkEntity(
     @PrimaryKey(autoGenerate = true)
     val id : Long,
-    val postId :Long,
+    val postId : Long,
     val author :String,
     val authorId : Long,
     val authorAvatar : String,
