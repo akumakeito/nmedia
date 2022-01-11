@@ -23,6 +23,7 @@ import java.lang.Exception
 
 private val empty = Post(
     id = 0L,
+    authorId = 0L,
     author = "",
     authorAvatar = "",
     published = "",
@@ -44,7 +45,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             repository.data
                 .map {posts ->
                     FeedModel(
-                        posts.map {it.copy(ownedByMe = it.id == myId)},
+                        posts.map {it.copy(ownedByMe = it.authorId == myId)},
                         posts.isEmpty()
                     )
                 }
