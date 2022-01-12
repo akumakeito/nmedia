@@ -185,25 +185,12 @@ class PostRepositoryImpl(
         postDao.readNewPost()
     }
 
-    override suspend fun signIn(): AuthState {
-        //TODO hardcode
-
-        val response = Api.service.updateUser("student", "secret")
-
-        if (!response.isSuccessful) {
-            throw ApiError(response.code(), response.message())
-        }
-
-        return response.body() ?: throw ApiError(response.code(), response.message())
-    }
 
     override suspend fun saveWork(post: Post, uploadedMedia: MediaUpload?): Long {
         try {
             val entity = PostWorkEntity.fromDto(post).apply {
                 if (uploadedMedia != null) {
                     this.uri = uploadedMedia.file.toUri().toString()
-                } else {
-                    this.attachment = null
                 }
             }
 
@@ -221,8 +208,9 @@ class PostRepositoryImpl(
             if (entity.uri != null) {
                 val upload = MediaUpload(Uri.parse(entity.uri).toFile())
                 saveWithAttachment(postEntity, upload)
+            } else {
+                save(postEntity)
             }
-            save(postEntity)
 
             postWorkDao.removeById(id)
 

@@ -13,7 +13,6 @@ class SavePostWorker(
     params :WorkerParameters
 ) : CoroutineWorker (applicationContext, params) {
     companion object{
-        const val name = "ru.netology.work.SavePostsWorker"
         const val postKey = "post"
     }
 
