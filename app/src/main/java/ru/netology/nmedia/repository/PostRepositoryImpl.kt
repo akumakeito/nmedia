@@ -185,17 +185,6 @@ class PostRepositoryImpl(
         postDao.readNewPost()
     }
 
-    override suspend fun signIn(): AuthState {
-        //TODO hardcode
-
-        val response = Api.service.updateUser("student", "secret")
-
-        if (!response.isSuccessful) {
-            throw ApiError(response.code(), response.message())
-        }
-
-        return response.body() ?: throw ApiError(response.code(), response.message())
-    }
 
     override suspend fun saveWork(post: Post, uploadedMedia: MediaUpload?): Long {
         try {
