@@ -9,6 +9,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
@@ -60,7 +61,7 @@ class PostViewHolder(
 
             val urlAvatar = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
 
-            GlideApp.with(binding.avatar)
+            Glide.with(binding.avatar)
                 .load(urlAvatar)
                 .circleCrop()
                 .placeholder(R.drawable.ic_baseline_avatar_placeholder_24)
