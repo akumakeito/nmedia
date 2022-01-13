@@ -210,9 +210,9 @@ class PostRepositoryImpl(
             if (entity.uri != null) {
                 val upload = MediaUpload(Uri.parse(entity.uri).toFile())
                 saveWithAttachment(postEntity, upload)
+            } else {
+                save(postEntity)
             }
-            save(postEntity)
-
             postWorkDao.removeById(id)
 
             println(entity.id)
