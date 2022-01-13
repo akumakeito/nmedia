@@ -39,6 +39,7 @@ private val empty = Post(
 
 private val noPhoto = PhotoModel()
 
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: PostRepository =
         PostRepositoryImpl(
