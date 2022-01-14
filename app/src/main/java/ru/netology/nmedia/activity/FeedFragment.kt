@@ -19,6 +19,7 @@ import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.viewModel.PostViewModel
 
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class FeedFragment : Fragment() {
     private val viewModel: PostViewModel by viewModels(
     ownerProducer = ::requireParentFragment

@@ -14,7 +14,7 @@ import ru.netology.nmedia.utils.AndroidUtils
 import ru.netology.nmedia.utils.StringArg
 import ru.netology.nmedia.viewModel.PostViewModel
 
-
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class EditPostFragment : Fragment() {
     companion object {
         var Bundle.edit: String? by StringArg
