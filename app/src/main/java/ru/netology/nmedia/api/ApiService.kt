@@ -12,6 +12,7 @@ import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auth.AuthState
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.UserKey
 import ru.netology.ru.netology.nmedia.dto.PushToken
 
 private const val BASE_URL = BuildConfig.BASE_URL
@@ -73,7 +74,7 @@ interface ApiService {
     suspend fun upload(@Part media : MultipartBody.Part) : Response<Media>
     @FormUrlEncoded
     @POST("users/authentication")
-    suspend fun updateUser(@Field("login") login : String, @Field("pass") pass : String) : Response<AuthState>
+    suspend fun updateUser(@Field("login") login : String, @Field("pass") pass : String) : Response<UserKey>
 }
 
 object Api {

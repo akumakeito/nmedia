@@ -46,7 +46,7 @@ class PostViewHolder(
     fun bind(post: Post) {
         binding.apply {
             author.text = post.author
-            published.text = post.published
+            published.text = post.published.toString()
             content.text = post.content
             like.text = WallService.displayCount(post.likes)
             like.isChecked = post.likedByMe

@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.SignInFragmentBinding
 import ru.netology.nmedia.utils.AndroidUtils
 import ru.netology.nmedia.viewModel.SignViewModel
@@ -25,6 +26,8 @@ class SignInFragment : Fragment() {
     ): View? {
         val binding = SignInFragmentBinding.inflate(inflater, container, false)
 
+        binding.username.requestFocus()
+
         binding.singInButton.setOnClickListener {
             if (binding.username.text.isNullOrBlank() || binding.password.text.isNullOrBlank()) {
                 Toast.makeText(
@@ -33,9 +36,16 @@ class SignInFragment : Fragment() {
                     Toast.LENGTH_LONG
                 )
                     .show()
+            } else {
+                viewModel.signIn(
+                    binding.username.text.toString(),
+                    binding.password.text.toString(),
+                    requireContext()
+                )
+
             }
-            else {
-                viewModel.signIn()
+            viewModel.data.observe(viewLifecycleOwner) {
+                AppAuth.getInstance().setAuth(it.id, it.token)
                 AndroidUtils.hideKeyboard(requireView())
                 findNavController().navigateUp()
             }
