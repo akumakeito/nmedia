@@ -30,7 +30,7 @@ class ShowPhotoFragment : Fragment() {
 
             val url = "http://10.0.2.2:9999/media/${requireArguments().getString("url")}"
 
-            GlideApp.with(binding.shownPhoto)
+            Glide.with(binding.shownPhoto)
                 .load(url)
                 .placeholder(R.drawable.ic_baseline_image_placeholder_24)
                 .error(R.drawable.ic_baseline_error_24)
