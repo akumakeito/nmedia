@@ -16,6 +16,7 @@ import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.WallService
 
+
 interface OnInteractionListener {
     fun onLike(post: Post) {}
     fun onEdit(post: Post) {}

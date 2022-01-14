@@ -27,6 +27,7 @@ import java.lang.Exception
 
 private val empty = Post(
     id = 0L,
+    authorId = 0L,
     author = "",
     authorId = 0L,
     authorAvatar = "",
