@@ -1,6 +1,9 @@
 package ru.netology.nmedia.repository
 
 
+import android.net.Uri
+import androidx.core.net.toFile
+import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -14,17 +17,22 @@ import ru.netology.nmedia.UnknownAppError
 import ru.netology.nmedia.api.Api
 import ru.netology.nmedia.auth.AuthState
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.dao.PostWorkDao
 import ru.netology.nmedia.dto.*
 import ru.netology.nmedia.entity.PostEntity
+import ru.netology.nmedia.entity.PostWorkEntity
 import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.entity.toEntity
 import java.io.IOException
 import java.lang.Exception
 
-class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
+class PostRepositoryImpl(
+    private val postDao: PostDao,
+    private val postWorkDao: PostWorkDao
+) : PostRepository {
 
 
-    override val data: Flow<List<Post>> = dao.getAll()
+    override val data: Flow<List<Post>> = postDao.getAll()
         .map(List<PostEntity>::toDto)
         .flowOn(Dispatchers.Default)
 
@@ -37,13 +45,13 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             }
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
-            if (dao.isEmpty()) {
-                dao.insert(body.toEntity(false))
-                dao.readNewPost()
+            if (postDao.isEmpty()) {
+                postDao.insert(body.toEntity(false))
+                postDao.readNewPost()
             }
-            if (body.size > dao.countPosts()) {
-                val notInRoomPosts = body.takeLast(body.size - dao.countPosts())
-                dao.insert(notInRoomPosts.toEntity(true))
+            if (body.size > postDao.countPosts()) {
+                val notInRoomPosts = body.takeLast(body.size - postDao.countPosts())
+                postDao.insert(notInRoomPosts.toEntity(true))
             }
 
         } catch (e: IOException) {
@@ -62,7 +70,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             }
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
-            dao.insert(PostEntity.fromDto(body))
+            postDao.insert(PostEntity.fromDto(body))
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
@@ -73,7 +81,8 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     override suspend fun saveWithAttachment(post: Post, media: MediaUpload) {
         try {
             val uploadedMedia = upload(media)
-            val postWithAttachment = post.copy(attachment = Attachment(uploadedMedia.id, AttachmentType.IMAGE))
+            val postWithAttachment =
+                post.copy(attachment = Attachment(uploadedMedia.id, AttachmentType.IMAGE))
             save(postWithAttachment)
         } catch (e: AppError) {
             throw e
@@ -93,7 +102,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             }
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
-            dao.insert(PostEntity.fromDto(body))
+            postDao.insert(PostEntity.fromDto(body))
 
         } catch (e: IOException) {
             throw NetworkError
@@ -110,7 +119,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             }
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
-            dao.insert(PostEntity.fromDto(body))
+            postDao.insert(PostEntity.fromDto(body))
 
         } catch (e: IOException) {
             throw NetworkError
@@ -127,7 +136,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
                 throw ApiError(response.code(), response.message())
             }
 
-            dao.removeById(id)
+            postDao.removeById(id)
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
@@ -164,8 +173,8 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             }
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
-            dao.insert(body.toEntity(false))
-            val newPosts = dao.getNewer()
+            postDao.insert(body.toEntity(false))
+            val newPosts = postDao.getNewer()
             emit(newPosts.size)
         }
     }
@@ -173,19 +182,42 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         .flowOn(Dispatchers.Default)
 
     override suspend fun readPosts() {
-        dao.readNewPost()
+        postDao.readNewPost()
     }
 
-    override suspend fun signIn() : AuthState {
-        //TODO hardcode
 
-        val response = Api.service.updateUser("student", "secret")
+    override suspend fun saveWork(post: Post, uploadedMedia: MediaUpload?): Long {
+        try {
+            val entity = PostWorkEntity.fromDto(post).apply {
+                if (uploadedMedia != null) {
+                    this.uri = uploadedMedia.file.toUri().toString()
+                }
+            }
 
-        if (!response.isSuccessful) {
-            throw ApiError(response.code(), response.message())
+            return postWorkDao.insert(entity)
+
+        } catch (e: Exception) {
+            throw UnknownAppError
         }
+    }
 
-        return response.body() ?: throw ApiError(response.code(), response.message())
+    override suspend fun processWork(id: Long) {
+        try {
+            val entity = postWorkDao.getById(id)
+            val postEntity = entity.toDto()
+            if (entity.uri != null) {
+                val upload = MediaUpload(Uri.parse(entity.uri).toFile())
+                saveWithAttachment(postEntity, upload)
+            } else {
+                save(postEntity)
+            }
+
+            postWorkDao.removeById(id)
+
+            println(entity.id)
+        } catch (e: Exception) {
+            throw UnknownAppError
+        }
     }
 
 }
