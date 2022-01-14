@@ -10,11 +10,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.WallService
-import ru.netology.nmedia.utils.GlideApp
+//import ru.netology.nmedia.utils.GlideApp
 
 interface OnInteractionListener {
     fun onLike(post: Post) {}
@@ -53,7 +54,7 @@ class PostViewHolder(
 
             val urlImage = "http://10.0.2.2:9999/media/${post.attachment?.url}"
             if (post.attachment != null) {
-                GlideApp.with(binding.image)
+                Glide.with(binding.image)
                     .load(urlImage)
                     .into(binding.image)
             }
@@ -61,7 +62,7 @@ class PostViewHolder(
 
             val urlAvatar = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
 
-            GlideApp.with(binding.avatar)
+            Glide.with(binding.avatar)
                 .load(urlAvatar)
                 .circleCrop()
                 .placeholder(R.drawable.ic_baseline_avatar_placeholder_24)
