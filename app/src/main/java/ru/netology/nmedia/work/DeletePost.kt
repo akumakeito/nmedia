@@ -2,6 +2,8 @@ package ru.netology.nmedia.work
 
 import android.content.Context
 import androidx.work.CoroutineWorker
+import androidx.work.ListenableWorker
+import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import ru.netology.nmedia.db.AppDB
 import ru.netology.nmedia.repository.PostRepository
@@ -10,7 +12,8 @@ import java.lang.Exception
 
 class DeletePostWorker(
     applicationContext: Context,
-    params: WorkerParameters
+    params: WorkerParameters,
+    private val repository: PostRepository
 ) : CoroutineWorker(applicationContext, params) {
     companion object {
         const val name = "ru.netology.work.DeletePostsWorker"
@@ -22,11 +25,6 @@ class DeletePostWorker(
         if (id == 0L) {
             return Result.failure()
         }
-        val repository: PostRepository =
-            PostRepositoryImpl(
-                AppDB.getInstance(context = applicationContext).postDao(),
-                AppDB.getInstance(context = applicationContext).postWorkDao()
-            )
 
         return try {
             repository.removeById(id)
@@ -36,4 +34,18 @@ class DeletePostWorker(
         }
     }
 
+}
+
+class DeletePostWorkerFactory(
+    private val repository: PostRepository
+) : WorkerFactory() {
+    override fun createWorker(
+        appContext: Context,
+        workerClassName: String,
+        workerParameters: WorkerParameters
+    ): ListenableWorker? = when (workerClassName) {
+        DeletePostWorker::class.java.name ->
+            DeletePostWorker(appContext,workerParameters,repository)
+        else -> null
+    }
 }

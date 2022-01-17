@@ -1,6 +1,7 @@
 package ru.netology.nmedia.repository
 
 
+//import ru.netology.nmedia.adapter.PostAdapter
 import android.net.Uri
 import androidx.core.net.toFile
 import androidx.core.net.toUri
@@ -13,9 +14,7 @@ import ru.netology.nmedia.ApiError
 import ru.netology.nmedia.AppError
 import ru.netology.nmedia.NetworkError
 import ru.netology.nmedia.UnknownAppError
-//import ru.netology.nmedia.adapter.PostAdapter
-import ru.netology.nmedia.api.Api
-import ru.netology.nmedia.auth.AuthState
+import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dao.PostWorkDao
 import ru.netology.nmedia.dto.*
@@ -24,11 +23,11 @@ import ru.netology.nmedia.entity.PostWorkEntity
 import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.entity.toEntity
 import java.io.IOException
-import java.lang.Exception
 
 class PostRepositoryImpl(
     private val postDao: PostDao,
-    private val postWorkDao: PostWorkDao
+    private val postWorkDao: PostWorkDao,
+    private val service : ApiService
 ) : PostRepository {
 
 
@@ -39,7 +38,7 @@ class PostRepositoryImpl(
 
     override suspend fun getAll() {
         try {
-            val response = Api.service.getAll()
+            val response = service.getAll()
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -64,7 +63,7 @@ class PostRepositoryImpl(
 
     override suspend fun save(post: Post) {
         try {
-            val response = Api.service.save(post)
+            val response = service.save(post)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -96,7 +95,7 @@ class PostRepositoryImpl(
     override suspend fun likeById(id: Long) {
         try {
 
-            val response = Api.service.likeById(id)
+            val response = service.likeById(id)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -113,7 +112,7 @@ class PostRepositoryImpl(
 
     override suspend fun unlikeById(id: Long) {
         try {
-            val response = Api.service.unlikeById(id)
+            val response = service.unlikeById(id)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -131,7 +130,7 @@ class PostRepositoryImpl(
 
     override suspend fun removeById(id: Long) {
         try {
-            val response = Api.service.removeById(id)
+            val response = service.removeById(id)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -150,7 +149,7 @@ class PostRepositoryImpl(
                 "file", uploadedMedia.file.name, uploadedMedia.file.asRequestBody()
             )
 
-            val response = Api.service.upload(media)
+            val response = service.upload(media)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -167,7 +166,7 @@ class PostRepositoryImpl(
     override fun getNewerCount(id: Long): Flow<Int> = flow {
         while (true) {
             delay(10_000L)
-            val response = Api.service.getNewer(id)
+            val response = service.getNewer(id)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }

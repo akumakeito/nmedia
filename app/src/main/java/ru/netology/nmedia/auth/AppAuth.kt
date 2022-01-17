@@ -1,6 +1,5 @@
 package ru.netology.nmedia.auth
 
-import android.content.Context
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
 import kotlinx.coroutines.CoroutineScope
@@ -10,28 +9,24 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import okhttp3.Dispatcher
-import ru.netology.nmedia.api.Api
+import ru.netology.nmedia.api.ApiService
+import ru.netology.nmedia.repository.UserRepository
 import ru.netology.ru.netology.nmedia.dto.PushToken
-import java.lang.IllegalStateException
 
-class AppAuth private constructor(context: Context) {
-    private val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-    private val idKey = "id"
-    private val tokenKey = "token"
-
-    private val _authStateFlow : MutableStateFlow<AuthState>
+class AppAuth(
+    private val service: ApiService,
+    private val userRepository: UserRepository
+)
+ {
+     private val _authStateFlow : MutableStateFlow<AuthState>
 
     init {
-        val id = prefs.getLong(idKey, 0L)
-        val token = prefs.getString(tokenKey, null)
+        val id = userRepository.userId ?: 0
+        val token = userRepository.token
 
         if (id == 0L || token ==  null) {
             _authStateFlow = MutableStateFlow(AuthState())
-            with(prefs.edit()) {
-                clear()
-                apply()
-            }
+            clear()
         } else {
             _authStateFlow = MutableStateFlow(AuthState(id, token))
         }
@@ -41,16 +36,15 @@ class AppAuth private constructor(context: Context) {
 
     }
 
-    val authStateFlow : StateFlow<AuthState> = _authStateFlow.asStateFlow()
+
+
+     val authStateFlow : StateFlow<AuthState> = _authStateFlow.asStateFlow()
 
     @Synchronized
     fun setAuth(id: Long, token: String) {
         _authStateFlow.value = AuthState(id, token)
-        with(prefs.edit()) {
-            putLong(idKey,id)
-            putString(tokenKey, token)
-            apply()
-        }
+        userRepository.userId = id
+        userRepository.token = token
 
         sendPushToken()
         println("id = $id, token = $token")
@@ -59,10 +53,7 @@ class AppAuth private constructor(context: Context) {
     @Synchronized
     fun removeAuth() {
         _authStateFlow.value = AuthState()
-        with(prefs.edit()) {
-            clear()
-            commit()
-        }
+        clear()
 
         sendPushToken()
     }
@@ -71,31 +62,35 @@ class AppAuth private constructor(context: Context) {
         CoroutineScope(Dispatchers.Default).launch {
             try {
                 val pushToken = PushToken(token ?: Firebase.messaging.token.await())
-                Api.service.save(pushToken)
+                service.save(pushToken)
             } catch (e : Exception) {
                 e.printStackTrace()
             }
         }
     }
+     private fun clear() {
+     userRepository.token = null
+     userRepository.userId = null
+ }
 
 
 
-    companion object {
-        @Volatile
-        private var instance : AppAuth? = null
-
-        fun getInstance() : AppAuth = synchronized(this) {
-            instance ?: throw IllegalStateException(
-                "AppAuth is not initialized, you must call AppAuth.initializeApp(Context context) first."
-            )
-        }
-
-        fun initApp(context : Context) : AppAuth = instance ?: synchronized(this) {
-            instance ?: buildAuth(context).also { instance = it}
-        }
-
-        private fun buildAuth(context: Context) : AppAuth = AppAuth(context)
-    }
+//    companion object {
+//        @Volatile
+//        private var instance : AppAuth? = null
+//
+//        fun getInstance() : AppAuth = synchronized(this) {
+//            instance ?: throw IllegalStateException(
+//                "AppAuth is not initialized, you must call AppAuth.initializeApp(Context context) first."
+//            )
+//        }
+//
+//        fun initApp(context : Context) : AppAuth = instance ?: synchronized(this) {
+//            instance ?: buildAuth(context).also { instance = it}
+//        }
+//
+//        private fun buildAuth(context: Context) : AppAuth = AppAuth(context)
+//    }
 
 }
 

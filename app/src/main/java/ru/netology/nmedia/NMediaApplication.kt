@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.work.RefreshPostsWorker
 import java.util.concurrent.TimeUnit
 
@@ -14,6 +15,8 @@ class NMediaApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        DependencyContainer.init(this)
         setupAuth()
         setWork()
 

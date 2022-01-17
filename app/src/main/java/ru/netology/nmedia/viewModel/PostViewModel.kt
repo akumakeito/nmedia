@@ -39,12 +39,12 @@ private val empty = Post(
 
 private val noPhoto = PhotoModel()
 
-class PostViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: PostRepository =
-        PostRepositoryImpl(
-            AppDB.getInstance(context = application).postDao(),
-            AppDB.getInstance(context = application).postWorkDao()
-        )
+class PostViewModel(
+    private val repository: PostRepository,
+    private val appAuth: AppAuth
+    ) : ViewModel() {
+
+
     private val workManager : WorkManager =
         WorkManager.getInstance(application)
 

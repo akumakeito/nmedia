@@ -14,23 +14,6 @@ import ru.netology.nmedia.entity.PostWorkEntity
 @Database(entities = [PostEntity::class, PostWorkEntity::class], version = 1, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDB : RoomDatabase() {
-    abstract fun postDao() : PostDao
-    abstract fun postWorkDao() : PostWorkDao
-
-    companion object {
-        @Volatile
-        private var instance : AppDB? = null
-
-        fun getInstance(context: Context) : AppDB {
-            return instance ?: synchronized(this) {
-                instance ?: buildDatabase(context).also { instance = it}
-            }
-        }
-
-        private fun buildDatabase(context: Context) =
-            Room.databaseBuilder(context, AppDB::class.java,"app.db")
-                .fallbackToDestructiveMigration()
-                //.allowMainThreadQueries()
-                .build()
-    }
+    abstract fun postDao(): PostDao
+    abstract fun postWorkDao(): PostWorkDao
 }
