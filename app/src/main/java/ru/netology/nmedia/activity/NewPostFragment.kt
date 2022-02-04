@@ -14,12 +14,14 @@ import com.github.dhaval2404.imagepicker.constant.ImageProvider
 
 
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.NewPostFragmentBinding
 import ru.netology.nmedia.utils.AndroidUtils
 import ru.netology.nmedia.utils.StringArg
 import ru.netology.nmedia.viewModel.PostViewModel
 
+@AndroidEntryPoint
 class NewPostFragment : Fragment() {
 
     companion object {

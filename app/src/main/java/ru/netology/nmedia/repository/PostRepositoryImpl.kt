@@ -10,8 +10,7 @@ import ru.netology.nmedia.ApiError
 import ru.netology.nmedia.AppError
 import ru.netology.nmedia.NetworkError
 import ru.netology.nmedia.UnknownAppError
-//import ru.netology.nmedia.adapter.PostAdapter
-import ru.netology.nmedia.api.Api
+import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.auth.AuthState
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.*
@@ -19,9 +18,11 @@ import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.entity.toEntity
 import java.io.IOException
-import java.lang.Exception
+import javax.inject.Inject
 
-class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
+class PostRepositoryImpl @Inject constructor(
+    private val dao: PostDao,
+    private val apiService: ApiService) : PostRepository {
 
 
     override val data: Flow<List<Post>> = dao.getAll()
@@ -31,7 +32,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     override suspend fun getAll() {
         try {
-            val response = Api.service.getAll()
+            val response = apiService.getAll()
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -56,7 +57,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     override suspend fun save(post: Post) {
         try {
-            val response = Api.service.save(post)
+            val response = apiService.save(post)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -87,7 +88,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     override suspend fun likeById(id: Long) {
         try {
 
-            val response = Api.service.likeById(id)
+            val response = apiService.likeById(id)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -104,7 +105,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     override suspend fun unlikeById(id: Long) {
         try {
-            val response = Api.service.unlikeById(id)
+            val response = apiService.unlikeById(id)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -122,7 +123,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     override suspend fun removeById(id: Long) {
         try {
-            val response = Api.service.removeById(id)
+            val response = apiService.removeById(id)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -141,7 +142,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
                 "file", uploadedMedia.file.name, uploadedMedia.file.asRequestBody()
             )
 
-            val response = Api.service.upload(media)
+            val response = apiService.upload(media)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -158,7 +159,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     override fun getNewerCount(id: Long): Flow<Int> = flow {
         while (true) {
             delay(10_000L)
-            val response = Api.service.getNewer(id)
+            val response = apiService.getNewer(id)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -176,16 +177,5 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         dao.readNewPost()
     }
 
-    override suspend fun signIn() : AuthState {
-        //TODO hardcode
-
-        val response = Api.service.updateUser("student", "secret")
-
-        if (!response.isSuccessful) {
-            throw ApiError(response.code(), response.message())
-        }
-
-        return response.body() ?: throw ApiError(response.code(), response.message())
-    }
 
 }

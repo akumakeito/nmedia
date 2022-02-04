@@ -4,19 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import com.bumptech.glide.Glide
-import com.bumptech.glide.Glide.with
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
-import ru.netology.nmedia.adapter.PostAdapter
-
 import ru.netology.nmedia.databinding.FragmentShowPhotoBinding
-import ru.netology.nmedia.utils.*
+import ru.netology.nmedia.utils.GlideApp
 
-import ru.netology.nmedia.viewModel.PostViewModel
-
+@AndroidEntryPoint
 class ShowPhotoFragment : Fragment() {
 
 
