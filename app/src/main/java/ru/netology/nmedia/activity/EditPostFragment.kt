@@ -8,13 +8,14 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.EditPostFragmentBinding
 import ru.netology.nmedia.utils.AndroidUtils
 import ru.netology.nmedia.utils.StringArg
 import ru.netology.nmedia.viewModel.PostViewModel
 
-
+@AndroidEntryPoint
 class EditPostFragment : Fragment() {
     companion object {
         var Bundle.edit: String? by StringArg

@@ -8,12 +8,20 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.SignInFragmentBinding
 import ru.netology.nmedia.utils.AndroidUtils
 import ru.netology.nmedia.viewModel.SignViewModel
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class SignInFragment : Fragment() {
+
+    @Inject
+    lateinit var appAuth: AppAuth
+
     private val viewModel : SignViewModel by viewModels(
         ownerProducer = ::requireParentFragment
     )
@@ -35,7 +43,14 @@ class SignInFragment : Fragment() {
                     .show()
             }
             else {
-                viewModel.signIn()
+                viewModel.signIn(
+                    binding.username.text.toString(),
+                    binding.password.text.toString(),
+                    requireContext()
+                )
+            }
+            viewModel.data.observe(viewLifecycleOwner) {
+                appAuth.setAuth(it.id, it.token)
                 AndroidUtils.hideKeyboard(requireView())
                 findNavController().navigateUp()
             }
