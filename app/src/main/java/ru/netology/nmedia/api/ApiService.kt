@@ -3,7 +3,6 @@ package ru.netology.nmedia.api
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
-import ru.netology.nmedia.auth.AuthState
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.UserKey
