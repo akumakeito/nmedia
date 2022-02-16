@@ -55,10 +55,8 @@ class PostViewModel @Inject constructor(
         }
 
     private val _dataState = MutableLiveData<FeedModelState>()
-    val dataState: LiveData<FeedModelState>
-        get() = _dataState
 
-//    val newerCount: LiveData<Int> = data.switchMap {
+    //    val newerCount: LiveData<Int> = data.switchMap {
 //        repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
 //            .catch { e -> e.printStackTrace() }
 //            .asLiveData()
@@ -80,16 +78,6 @@ class PostViewModel @Inject constructor(
     fun loadPosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(loading = true)
-            //repository.getAll()
-            _dataState.value = FeedModelState()
-        } catch (e: Exception) {
-            _dataState.value = FeedModelState(error = true)
-        }
-    }
-
-    fun refreshPosts() = viewModelScope.launch {
-        try {
-            _dataState.value = FeedModelState(refreshing = true)
             //repository.getAll()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
