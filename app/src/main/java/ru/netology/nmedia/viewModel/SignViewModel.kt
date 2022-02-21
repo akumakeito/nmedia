@@ -1,18 +1,16 @@
 package ru.netology.nmedia.viewModel
 
-import android.app.Application
 import android.content.Context
 import android.widget.Toast
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.api.ApiService
-import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.db.AppDB
 import ru.netology.nmedia.dto.UserKey
-import ru.netology.nmedia.repository.PostRepository
-import ru.netology.nmedia.repository.PostRepositoryImpl
 import javax.inject.Inject
 
 @HiltViewModel

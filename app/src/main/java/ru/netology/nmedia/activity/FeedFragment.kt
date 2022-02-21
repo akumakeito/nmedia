@@ -5,19 +5,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.snackbar.Snackbar
+import androidx.paging.LoadState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.model.FeedModel
-import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.viewModel.PostViewModel
 
 @AndroidEntryPoint
@@ -72,33 +71,50 @@ class FeedFragment : Fragment() {
         })
 
         binding.list.adapter = adapter
-        viewModel.data.observe(viewLifecycleOwner, { post : FeedModel->
-            adapter.submitList(post.posts)
-            binding.emptyText.isVisible = post.empty
-        })
 
-        viewModel.dataState.observe(viewLifecycleOwner, { state : FeedModelState->
-            binding.progress.isVisible = state.loading
-            binding.swiperefresh.isRefreshing = state.refreshing
-            if (state.error) {
-                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.retry_loading) { viewModel.loadPosts() }
-                    .show()
+        lifecycleScope.launchWhenCreated {
+            viewModel.data.collectLatest { state ->
+                adapter.submitData(state)
             }
+        }
 
-        })
+        lifecycleScope.launchWhenCreated {
+            adapter.loadStateFlow.collectLatest { state ->
+                binding.swiperefresh.isRefreshing =
+                    state.refresh is LoadState.Loading ||
+                    state.append is LoadState.Loading ||
+                    state.prepend is LoadState.Loading
+            }
+        }
+
+//        viewModel.data.observe(viewLifecycleOwner, { post : FeedModel->
+//            adapter.submitList(post.posts)
+//            binding.emptyText.isVisible = post.empty
+//        })
+
+
+//        viewModel.dataState.observe(viewLifecycleOwner, { state : FeedModelState->
+//            binding.progress.isVisible = state.loading
+//            binding.swiperefresh.isRefreshing = state.refreshing
+//            if (state.error) {
+//                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
+//                    .setAction(R.string.retry_loading) { viewModel.loadPosts() }
+//                    .show()
+//            }
+//
+//        })
 
         binding.newerPostLoad.hide()
 
-
-        viewModel.newerCount.observe(viewLifecycleOwner) { count ->
-            if (count > 0) {
-                binding.newerPostLoad.show()
-                binding.newerPostLoad.text =
-                    getString(R.string.have_new_posts, count.toString())
-            }
-
-        }
+//
+//        viewModel.newerCount.observe(viewLifecycleOwner) { count ->
+//            if (count > 0) {
+//                binding.newerPostLoad.show()
+//                binding.newerPostLoad.text =
+//                    getString(R.string.have_new_posts, count.toString())
+//            }
+//
+//        }
 
 
         binding.newerPostLoad.setOnClickListener{
@@ -111,7 +127,7 @@ class FeedFragment : Fragment() {
 
 
         binding.swiperefresh.setOnRefreshListener {
-            viewModel.refreshPosts()
+            adapter.refresh()
             binding.swiperefresh.isRefreshing = false
 
         }
