@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -49,9 +50,7 @@ class PostViewModel @Inject constructor(
 //        }
 
     val data: Flow<PagingData<Post>> = appAuth.authStateFlow
-        .flatMapLatest{
-            (_,_) ->
-            repository.data
+        .flatMapLatest{repository.data.cachedIn(viewModelScope)
         }
 
     private val _dataState = MutableLiveData<FeedModelState>()
