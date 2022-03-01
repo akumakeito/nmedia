@@ -40,7 +40,7 @@ data class PostEntity(
             PostEntity(
                 dto.id,
                 dto.authorId,
-                dto.author,
+                 dto.author,
                 dto.authorAvatar,
                 dto.published,
                 dto.content,

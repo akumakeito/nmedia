@@ -1,5 +1,6 @@
 package ru.netology.nmedia.dao
 
+import androidx.paging.PagingSource
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import ru.netology.nmedia.dto.AttachmentType
@@ -8,7 +9,7 @@ import ru.netology.nmedia.entity.PostEntity
 @Dao
 interface PostDao {
     @Query("SELECT * FROM PostEntity ORDER BY id DESC")
-    fun getAll(): Flow<List<PostEntity>>
+    fun getAll(): PagingSource<Int, PostEntity>
 
     @Query("SELECT * FROM PostEntity WHERE isRead = 0 ORDER BY id DESC")
     fun getNewer(): List<PostEntity>
@@ -32,6 +33,9 @@ interface PostDao {
         isRead = 1
         """)
     suspend fun readNewPost()
+
+    @Query("SELECT * FROM PostEntity ORDER BY id DESC")
+    fun pagingSource(): PagingSource<Int, PostEntity>
 
     @Query("SELECT COUNT(*) FROM PostEntity")
     suspend fun countPosts() : Int
