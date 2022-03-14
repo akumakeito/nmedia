@@ -9,7 +9,7 @@ import ru.netology.nmedia.entity.PostEntity
 @Dao
 interface PostDao {
     @Query("SELECT * FROM PostEntity ORDER BY id DESC")
-    fun getAll(): PagingSource<Int, PostEntity>
+    fun getAll(): Flow<List<PostEntity>>
 
     @Query("SELECT * FROM PostEntity WHERE isRead = 0 ORDER BY id DESC")
     fun getNewer(): List<PostEntity>
@@ -43,8 +43,13 @@ interface PostDao {
     @Query("DELETE FROM PostEntity WHERE id = :id")
     suspend fun removeById(id: Long)
 
+    @Query("DELETE FROM PostEntity")
+    suspend fun removeAll()
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(posts : List<PostEntity>)
+
+
 }
 
 class Converters {

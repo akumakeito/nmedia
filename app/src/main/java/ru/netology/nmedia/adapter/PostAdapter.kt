@@ -8,10 +8,14 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.Glide.with
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.WallService
+import ru.netology.nmedia.utils.GlideApp
+import ru.netology.nmedia.utils.GlideApp.with
+import ru.netology.nmedia.utils.MyAppGlideModule
 
 //import ru.netology.nmedia.utils.GlideApp
 
