@@ -2,11 +2,13 @@ package ru.netology.nmedia.repository
 
 import androidx.paging.*
 import androidx.room.withTransaction
+import kotlinx.coroutines.flow.takeWhile
 import ru.netology.nmedia.ApiError
 import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dao.PostRemoteKeyDao
 import ru.netology.nmedia.db.AppDB
+import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.PostRemoteKeyEntity
 import javax.inject.Inject
@@ -19,6 +21,12 @@ class PostRemoteMediator @Inject constructor(
     private val db: AppDB
             ) : RemoteMediator<Int, PostEntity>() {
 
+    override suspend fun initialize(): InitializeAction = if (postDao.isEmpty()) {
+            InitializeAction.LAUNCH_INITIAL_REFRESH
+        } else {
+            InitializeAction.SKIP_INITIAL_REFRESH
+        }
+
 
     override suspend fun load(loadType: LoadType, state: PagingState<Int, PostEntity>): MediatorResult {
         try {
@@ -29,8 +37,9 @@ class PostRemoteMediator @Inject constructor(
                     apiService.getBefore(id, state.config.pageSize)
                 }
                 LoadType.PREPEND -> {
-                    val id = postRemoteKeyDao.max() ?: return MediatorResult.Success(false)
-                    apiService.getAfter(id, state.config.pageSize)
+                    return MediatorResult.Success(false)
+                    //val id = postRemoteKeyDao.max() ?:
+                    //apiService.getAfter(id, state.config.pageSize)
                 }
             }
 
@@ -52,6 +61,15 @@ class PostRemoteMediator @Inject constructor(
             db.withTransaction {
                 when(loadType) {
                     LoadType.REFRESH -> {
+
+                        if (postDao.isEmpty()) {
+                            postDao.insert(body.map(PostEntity::fromDto))
+                        } else {
+                            val firstId = postRemoteKeyDao.max()!!.toLong()
+                            val posts = body.takeLastWhile { it.id != firstId}
+                            postDao.insert(posts.map(PostEntity::fromDto))
+                        }
+
                         postRemoteKeyDao.removeAll()
                         postRemoteKeyDao.insert(
                             listOf(
@@ -65,23 +83,26 @@ class PostRemoteMediator @Inject constructor(
                                 )
                             )
                         )
-                        postDao.removeAll()
                     }
-                    LoadType.PREPEND ->  postRemoteKeyDao.insert(
+//                    LoadType.PREPEND ->
+//                        postRemoteKeyDao.insert(
+//                            PostRemoteKeyEntity(
+//                                type = PostRemoteKeyEntity.KeyType.AFTER,
+//                                id = body.first().id
+//                            )
+//                    )
+                    LoadType.APPEND -> {
+                        postRemoteKeyDao.insert(
                             PostRemoteKeyEntity(
-                                type = PostRemoteKeyEntity.KeyType.AFTER,
-                                id = body.first().id
+                                type = PostRemoteKeyEntity.KeyType.BEFORE,
+                                id = body.last().id
                             )
-                    )
-                    LoadType.APPEND -> postRemoteKeyDao.insert(
-                        PostRemoteKeyEntity(
-                            type = PostRemoteKeyEntity.KeyType.BEFORE,
-                            id = body.last().id
                         )
-                    )
+                        postDao.insert(body.map(PostEntity::fromDto))
+                    }
                 }
 
-                postDao.insert(body.map(PostEntity::fromDto))
+
             }
 
 
