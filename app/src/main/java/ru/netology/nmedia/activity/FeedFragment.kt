@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.collectLatest
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostAdapter
+import ru.netology.nmedia.adapter.PostLoadStateAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewModel.PostViewModel
@@ -70,7 +71,10 @@ class FeedFragment : Fragment() {
 
         })
 
-        binding.list.adapter = adapter
+        binding.list.adapter = adapter.withLoadStateHeaderAndFooter(
+            header = PostLoadStateAdapter{ adapter.retry() },
+            footer = PostLoadStateAdapter{ adapter.retry() }
+        )
 
         lifecycleScope.launchWhenCreated {
             viewModel.data.collectLatest { state ->
