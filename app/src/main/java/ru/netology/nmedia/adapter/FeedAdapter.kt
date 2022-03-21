@@ -26,9 +26,9 @@ interface OnInteractionListener {
     fun onShowPhoto(post : Post) {}
 }
 
-class PostAdapter(
+class FeedAdapter(
     private val onInteractionListener: OnInteractionListener
-) : PagingDataAdapter<FeedItem, RecyclerView.ViewHolder>(PostViewHolder.PostDiffCallback()) {
+) : PagingDataAdapter<FeedItem, RecyclerView.ViewHolder>(PostViewHolder.FeedItemDiffCallback()) {
 
     override fun getItemViewType(position: Int) : Int {
         return when (getItem(position)) {
@@ -146,7 +146,7 @@ class PostViewHolder(
     }
 
 
-    class PostDiffCallback : DiffUtil.ItemCallback<FeedItem>() {
+    class FeedItemDiffCallback : DiffUtil.ItemCallback<FeedItem>() {
         override fun areItemsTheSame(oldItem: FeedItem, newItem: FeedItem): Boolean {
             if (oldItem::class != newItem::class) {
                 return false

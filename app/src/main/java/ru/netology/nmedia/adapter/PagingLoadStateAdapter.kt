@@ -8,9 +8,9 @@ import androidx.paging.LoadStateAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.databinding.LoadStateBinding
 
-class PostLoadStateAdapter(
+class PagingLoadStateAdapter(
     private val retryListener: () -> Unit
-) : LoadStateAdapter<LoadStateViewHolder>() {
+) : LoadStateAdapter<PagingLoadStateAdapter.LoadStateViewHolder>() {
     override fun onBindViewHolder(holder: LoadStateViewHolder, loadState: LoadState) {
         holder.bind(loadState)
     }
@@ -21,28 +21,27 @@ class PostLoadStateAdapter(
             retryListener
 
         )
+    class LoadStateViewHolder(
+        private val binding : LoadStateBinding,
+        private val retryListener: () -> Unit
+    ) : RecyclerView.ViewHolder(binding.root) {
 
-}
+        fun bind(loadState: LoadState) {
 
-class LoadStateViewHolder(
-    private val binding : LoadStateBinding,
-    private val retryListener: () -> Unit
-) : RecyclerView.ViewHolder(binding.root) {
+            binding.apply {
+                retry.isVisible = loadState is LoadState.Error
+                progress.isVisible = loadState is LoadState.Loading
 
-    fun bind(loadState: LoadState) {
-
-        binding.apply {
-            retry.isVisible = loadState is LoadState.Error
-            progress.isVisible = loadState is LoadState.Loading
-
-            retry.setOnClickListener{
-                retryListener()
+                retry.setOnClickListener{
+                    retryListener()
+                }
             }
+
+
+
+
         }
 
-
-
-
     }
-
 }
+
