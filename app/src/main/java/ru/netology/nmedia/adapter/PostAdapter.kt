@@ -71,6 +71,7 @@ class AdViewHolder(
     fun bind(ad : Ad) {
         GlideApp.with(binding.adImage)
             .load("http://10.0.2.2:9999/media/${ad.image}")
+            .into(binding.adImage)
     }
 }
 
