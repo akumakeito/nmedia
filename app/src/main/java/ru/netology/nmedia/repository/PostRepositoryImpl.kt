@@ -1,15 +1,10 @@
 package ru.netology.nmedia.repository
 
 
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
+import androidx.paging.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.*
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import ru.netology.nmedia.ApiError
@@ -18,6 +13,8 @@ import ru.netology.nmedia.NetworkError
 import ru.netology.nmedia.UnknownAppError
 import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.dao.PostRemoteKeyDao
+import ru.netology.nmedia.db.AppDB
 import ru.netology.nmedia.dto.*
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.toEntity
@@ -25,14 +22,19 @@ import java.io.IOException
 import javax.inject.Inject
 
 class PostRepositoryImpl @Inject constructor(
-    private val dao: PostDao,
-    private val apiService: ApiService) : PostRepository {
+    private val postDao: PostDao,
+    private val apiService: ApiService,
+    remoteMediator: PostRemoteMediator
+) : PostRepository {
 
 
+    @OptIn(ExperimentalPagingApi::class)
     override val data: Flow<PagingData<Post>> = Pager(
-        PagingConfig(pageSize = 5, enablePlaceholders = false),
-        pagingSourceFactory = {PostPagingSource(apiService)}
+        config = PagingConfig(pageSize = 25, enablePlaceholders = false),
+        pagingSourceFactory = postDao::pagingSource,
+        remoteMediator = remoteMediator
     ).flow
+        .map { it.map(PostEntity::toDto)}
 
 
     override suspend fun getAll() {
@@ -43,13 +45,13 @@ class PostRepositoryImpl @Inject constructor(
             }
 
             val body = response.body() ?: throw ApiError(response.message())
-            if (dao.isEmpty()) {
-                dao.insert(body.toEntity(false))
-                dao.readNewPost()
+            if (postDao.isEmpty()) {
+                postDao.insert(body.toEntity(false))
+                postDao.readNewPost()
             }
-            if (body.size > dao.countPosts()) {
-                val notInRoomPosts = body.takeLast(body.size - dao.countPosts())
-                dao.insert(notInRoomPosts.toEntity(true))
+            if (body.size > postDao.countPosts()) {
+                val notInRoomPosts = body.takeLast(body.size - postDao.countPosts())
+                postDao.insert(notInRoomPosts.toEntity(true))
             }
 
         } catch (e: IOException) {
@@ -68,7 +70,7 @@ class PostRepositoryImpl @Inject constructor(
             }
 
             val body = response.body() ?: throw ApiError(response.message())
-            dao.insert(PostEntity.fromDto(body))
+            postDao.insert(PostEntity.fromDto(body))
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
@@ -99,7 +101,7 @@ class PostRepositoryImpl @Inject constructor(
             }
 
             val body = response.body() ?: throw ApiError(response.message())
-            dao.insert(PostEntity.fromDto(body))
+            postDao.insert(PostEntity.fromDto(body))
 
         } catch (e: IOException) {
             throw NetworkError
@@ -116,7 +118,7 @@ class PostRepositoryImpl @Inject constructor(
             }
 
             val body = response.body() ?: throw ApiError(response.message())
-            dao.insert(PostEntity.fromDto(body))
+            postDao.insert(PostEntity.fromDto(body))
 
         } catch (e: IOException) {
             throw NetworkError
@@ -133,7 +135,7 @@ class PostRepositoryImpl @Inject constructor(
                 throw ApiError(response.message())
             }
 
-            dao.removeById(id)
+            postDao.removeById(id)
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
@@ -170,8 +172,8 @@ class PostRepositoryImpl @Inject constructor(
             }
 
             val body = response.body() ?: throw ApiError(response.message())
-            dao.insert(body.toEntity(false))
-            val newPosts = dao.getNewer()
+            postDao.insert(body.toEntity(false))
+            val newPosts = postDao.getNewer()
             emit(newPosts.size)
         }
     }
@@ -179,7 +181,7 @@ class PostRepositoryImpl @Inject constructor(
         .flowOn(Dispatchers.Default)
 
     override suspend fun readPosts() {
-        dao.readNewPost()
+        postDao.readNewPost()
     }
 
 
