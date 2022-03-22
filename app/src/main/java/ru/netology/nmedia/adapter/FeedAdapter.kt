@@ -68,7 +68,6 @@ class FeedAdapter(
         private val binding: CardAdBinding,
         private val onInteractionListener: OnInteractionListener
     ) : RecyclerView.ViewHolder(binding.root) {
-        @SuppressLint("CheckResult")
         fun bind(ad: Ad) {
             GlideApp.with(binding.adImage)
                 .load("http://10.0.2.2:9999/media/${ad.image}")
