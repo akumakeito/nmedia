@@ -28,9 +28,9 @@ interface OnInteractionListener {
 
 class FeedAdapter(
     private val onInteractionListener: OnInteractionListener
-) : PagingDataAdapter<FeedItem, RecyclerView.ViewHolder>(PostViewHolder.FeedItemDiffCallback()) {
+) : PagingDataAdapter<FeedItem, RecyclerView.ViewHolder>(FeedItemDiffCallback()) {
 
-    override fun getItemViewType(position: Int) : Int {
+    override fun getItemViewType(position: Int): Int {
         return when (getItem(position)) {
             is Ad -> R.layout.card_ad
             is Post -> R.layout.card_post
@@ -41,11 +41,13 @@ class FeedAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
         when (viewType) {
             R.layout.card_ad -> {
-                val binding = CardAdBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                val binding =
+                    CardAdBinding.inflate(LayoutInflater.from(parent.context), parent, false)
                 AdViewHolder(binding, onInteractionListener)
             }
             R.layout.card_post -> {
-                val binding = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                val binding =
+                    CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
                 PostViewHolder(binding, onInteractionListener)
             }
             else -> error("unknown view type : $viewType")
@@ -61,90 +63,91 @@ class FeedAdapter(
 
     }
 
-}
 
-class AdViewHolder(
-    private val binding: CardAdBinding,
-    private val onInteractionListener : OnInteractionListener
-) : RecyclerView.ViewHolder(binding.root) {
-    @SuppressLint("CheckResult")
-    fun bind(ad : Ad) {
-        GlideApp.with(binding.adImage)
-            .load("http://10.0.2.2:9999/media/${ad.image}")
-            .into(binding.adImage)
+    class AdViewHolder(
+        private val binding: CardAdBinding,
+        private val onInteractionListener: OnInteractionListener
+    ) : RecyclerView.ViewHolder(binding.root) {
+        @SuppressLint("CheckResult")
+        fun bind(ad: Ad) {
+            GlideApp.with(binding.adImage)
+                .load("http://10.0.2.2:9999/media/${ad.image}")
+                .into(binding.adImage)
+        }
     }
-}
 
-class PostViewHolder(
-    private val binding: CardPostBinding,
-    private val onInteractionListener: OnInteractionListener
-) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(post: Post) {
-        binding.apply {
-            author.text = post.author
-            published.text = post.published
-            content.text = post.content
-            like.text = WallService.displayCount(post.likes)
-            like.isChecked = post.likedByMe
+    class PostViewHolder(
+        private val binding: CardPostBinding,
+        private val onInteractionListener: OnInteractionListener
+    ) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(post: Post) {
+            binding.apply {
+                author.text = post.author
+                published.text = post.published
+                content.text = post.content
+                like.text = WallService.displayCount(post.likes)
+                like.isChecked = post.likedByMe
 
-            val urlImage = "http://10.0.2.2:9999/media/${post.attachment?.url}"
-            if (post.attachment != null) {
-                Glide.with(binding.image)
-                    .load(urlImage)
-                    .into(binding.image)
-            }
-
-
-            val urlAvatar = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
-
-            GlideApp.with(binding.avatar)
-                .load(urlAvatar)
-                .circleCrop()
-                .placeholder(R.drawable.ic_baseline_avatar_placeholder_24)
-                .error(R.drawable.ic_baseline_error_24)
-                .into(binding.avatar)
+                val urlImage = "http://10.0.2.2:9999/media/${post.attachment?.url}"
+                if (post.attachment != null) {
+                    Glide.with(binding.image)
+                        .load(urlImage)
+                        .into(binding.image)
+                }
 
 
+                val urlAvatar = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
 
-            like.setOnClickListener {
-                onInteractionListener.onLike(post)
-            }
+                GlideApp.with(binding.avatar)
+                    .load(urlAvatar)
+                    .circleCrop()
+                    .placeholder(R.drawable.ic_baseline_avatar_placeholder_24)
+                    .error(R.drawable.ic_baseline_error_24)
+                    .into(binding.avatar)
 
-            share.setOnClickListener {
-                onInteractionListener.onShare(post)
-            }
 
-            image.setOnClickListener {
-                onInteractionListener.onShowPhoto(post)
-            }
 
-            menu.visibility = if (post.ownedByMe) View.VISIBLE else View.INVISIBLE
+                like.setOnClickListener {
+                    onInteractionListener.onLike(post)
+                }
 
-            menu.setOnClickListener {
-                PopupMenu(it.context, it).apply {
-                    inflate(R.menu.options_post)
-                    setOnMenuItemClickListener { item ->
-                        when (item.itemId) {
-                            R.id.remove -> {
-                                onInteractionListener.onRemove(post)
-                                true
+                share.setOnClickListener {
+                    onInteractionListener.onShare(post)
+                }
+
+                image.setOnClickListener {
+                    onInteractionListener.onShowPhoto(post)
+                }
+
+                menu.visibility = if (post.ownedByMe) View.VISIBLE else View.INVISIBLE
+
+                menu.setOnClickListener {
+                    PopupMenu(it.context, it).apply {
+                        inflate(R.menu.options_post)
+                        setOnMenuItemClickListener { item ->
+                            when (item.itemId) {
+                                R.id.remove -> {
+                                    onInteractionListener.onRemove(post)
+                                    true
+                                }
+
+                                R.id.edit -> {
+                                    onInteractionListener.onEdit(post)
+                                    true
+                                }
+
+                                else -> false
                             }
-
-                            R.id.edit -> {
-                                onInteractionListener.onEdit(post)
-                                true
-                            }
-
-                            else -> false
                         }
-                    }
-                }.show()
+                    }.show()
+                }
             }
+
+
         }
 
 
     }
-
 
     class FeedItemDiffCallback : DiffUtil.ItemCallback<FeedItem>() {
         override fun areItemsTheSame(oldItem: FeedItem, newItem: FeedItem): Boolean {
@@ -158,7 +161,5 @@ class PostViewHolder(
         override fun areContentsTheSame(oldItem: FeedItem, newItem: FeedItem): Boolean {
             return oldItem == newItem
         }
-
     }
 }
-

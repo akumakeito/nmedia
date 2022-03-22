@@ -43,7 +43,7 @@ android {
         }
         debug {
             manifestPlaceholders.usesCleartextTraffic = true
-            buildConfigField "String", "BASE_URL", '"http://10.0.2.2:9999/api/"'
+            buildConfigField "String", "BASE_URL", '"http://10.0.2.2:9999/api/slow/"'
         }
     }
 }
