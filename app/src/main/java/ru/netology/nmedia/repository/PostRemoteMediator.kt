@@ -45,9 +45,8 @@ class PostRemoteMediator @Inject constructor(
                     apiService.getBefore(id, state.config.pageSize)
                 }
                 LoadType.PREPEND -> {
-                    return MediatorResult.Success(false)
-                    //val id = postRemoteKeyDao.max() ?:
-                    //apiService.getAfter(id, state.config.pageSize)
+                    val id = postRemoteKeyDao.max() ?: return MediatorResult.Success(false)
+                    apiService.getAfter(id, state.config.pageSize)
                 }
             }
 
@@ -92,13 +91,13 @@ class PostRemoteMediator @Inject constructor(
                         }
 
                     }
-//                    LoadType.PREPEND ->
-//                        postRemoteKeyDao.insert(
-//                            PostRemoteKeyEntity(
-//                                type = PostRemoteKeyEntity.KeyType.AFTER,
-//                                id = body.first().id
-//                            )
-//                    )
+                    LoadType.PREPEND ->
+                        postRemoteKeyDao.insert(
+                            PostRemoteKeyEntity(
+                                type = PostRemoteKeyEntity.KeyType.AFTER,
+                                id = body.first().id
+                            )
+                    )
                     LoadType.APPEND -> {
                         postRemoteKeyDao.insert(
                             PostRemoteKeyEntity(

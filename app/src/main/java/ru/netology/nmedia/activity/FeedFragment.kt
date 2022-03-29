@@ -14,7 +14,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractionListener
-import ru.netology.nmedia.adapter.PostAdapter
+import ru.netology.nmedia.adapter.FeedAdapter
+import ru.netology.nmedia.adapter.PagingLoadStateAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewModel.PostViewModel
@@ -33,7 +34,7 @@ class FeedFragment : Fragment() {
         val binding = FragmentFeedBinding.inflate(inflater,container, false)
 
 
-        val adapter = PostAdapter(object : OnInteractionListener{
+        val adapter = FeedAdapter(object : OnInteractionListener{
             override fun onLike(post: Post) {
                 if (post.likedByMe) viewModel.unlikeById(post.id) else viewModel.likeById(post.id)
             }
@@ -70,7 +71,10 @@ class FeedFragment : Fragment() {
 
         })
 
-        binding.list.adapter = adapter
+        binding.list.adapter = adapter.withLoadStateHeaderAndFooter(
+            header = PagingLoadStateAdapter{ adapter.retry() },
+            footer = PagingLoadStateAdapter{ adapter.retry() }
+        )
 
         lifecycleScope.launchWhenCreated {
             viewModel.data.collectLatest { state ->
@@ -81,9 +85,7 @@ class FeedFragment : Fragment() {
         lifecycleScope.launchWhenCreated {
             adapter.loadStateFlow.collectLatest { state ->
                 binding.swiperefresh.isRefreshing =
-                    state.refresh is LoadState.Loading ||
-                    state.append is LoadState.Loading ||
-                    state.prepend is LoadState.Loading
+                    state.refresh is LoadState.Loading
             }
         }
 
